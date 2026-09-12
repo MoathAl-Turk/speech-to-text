@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceScript - Speech to Text</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h2>🎙️ Voice-Memo</h2>
+            <p>Live Speech-to-Text Translator</p>
+        </div>
+
+        <div class="text-display">
+            <!--finalized text goes here--> 
+            <span id="final-text"></span>
+            <!--live,text goes here-->
+            <span id="guessed-text" style="color: #888;"></span>
+        </div>
+
+        <div class="controls">
+            <button id="mic-btn" class="btn primary-btn">Start Listening</button>
+            <button id="copy-btn" class="btn secondary-btn">Copy Text</button>
+            <button id="clear-btn" class="btn secondary-btn">Clear</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
