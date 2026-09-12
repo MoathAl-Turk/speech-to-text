@@ -117,3 +117,47 @@ body {
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
+/* --- Mobile Responsiveness --- */
+@media (max-width: 600px) {
+    body {
+        padding: 15px;
+        align-items: flex-start; /* Moves the app slightly higher on the screen */
+    }
+
+    .app-container {
+        padding: 20px;
+        border-radius: 20px;
+        height: auto; 
+        max-height: 95vh; /* Prevents it from going off-screen */
+    }
+
+    .header h2 { 
+        font-size: 24px; 
+    }
+
+    .text-display {
+        height: 250px; /* Slightly shorter to leave room for mobile keyboards */
+        font-size: 16px; /* Slightly smaller text for readability */
+        padding: 15px;
+    }
+
+    .controls {
+        flex-wrap: wrap; /* Allows buttons to drop to the next line if they don't fit */
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 12px;
+        font-size: 14px;
+        /* Makes the secondary buttons share a row evenly */
+        flex: 1 1 calc(33% - 10px); 
+    }
+
+    #mic-btn {
+        /* Forces the main Start Listening button to take up the full width */
+        flex: 1 1 100%; 
+        padding: 15px;
+        font-size: 16px;
+    }
+}
+
