@@ -1,5 +1,6 @@
 const micBtn = document.getElementById('mic-btn');
 const copyBtn = document.getElementById('copy-btn');
+const downloadBtn = document.getElementById('download-btn');
 const clearBtn = document.getElementById('clear-btn');
 const finalTextSpan = document.getElementById('final-text');
 const guessedTextSpan = document.getElementById('guessed-text');
@@ -8,7 +9,7 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 let recognition;
 let isRecording = false;
 
-// NEW: Variables to hold the entire text history so words don't get split across chunks
+// Variables to hold the text history so words don't get split across chunks
 let globalFinalText = ''; 
 let sessionFinalText = ''; 
 
@@ -67,7 +68,7 @@ if (SpeechRecognition) {
         sessionFinalText = ''; // Clear and rebuild to avoid duplicates
         let interimTranscript = '';
 
-        // NEW: Loop through ALL results from 0 to catch the entire phrase at once
+        // Loop through ALL results to catch the entire phrase at once
         for (let i = 0; i < event.results.length; ++i) {
             if (event.results[i].isFinal) {
                 sessionFinalText += event.results[i][0].transcript;
@@ -105,6 +106,7 @@ if (SpeechRecognition) {
     });
 
 } else {
+    // Unsupported Browser Message
     micBtn.textContent = "Browser Not Supported";
     micBtn.disabled = true;
     finalTextSpan.innerHTML = "<span style='color: #ff4b4b; font-weight: 600;'>Your browser does not support the Web Speech API. Please use a Chromium-based browser like Google Chrome or Microsoft Edge.</span>";
@@ -120,6 +122,31 @@ copyBtn.addEventListener('click', () => {
         copyBtn.textContent = "Copied!";
         setTimeout(() => copyBtn.textContent = originalText, 2000);
     });
+});
+
+// Utility: Download text as a .txt file
+downloadBtn.addEventListener('click', () => {
+    const textToSave = finalTextSpan.innerText.trim();
+    if (!textToSave) {
+        alert("There is no text to download yet!");
+        return;
+    }
+
+    // 1. Create a text file in the browser's memory
+    const blob = new Blob([textToSave], { type: 'text/plain;charset=utf-8' });
+
+    // 2. Create a hidden download link
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `voice-memo-${new Date().toISOString().slice(0, 10)}.txt`;
+
+    // 3. Trigger the click and remove the link
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up memory
+    URL.revokeObjectURL(link.href);
 });
 
 // Utility: Clear text
