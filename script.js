@@ -4,10 +4,13 @@ const clearBtn = document.getElementById('clear-btn');
 const finalTextSpan = document.getElementById('final-text');
 const guessedTextSpan = document.getElementById('guessed-text');
 
-// Initialize the Web Speech API
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition;
 let isRecording = false;
+
+// NEW: Variables to hold the entire text history so words don't get split across chunks
+let globalFinalText = ''; 
+let sessionFinalText = ''; 
 
 // --- Voice Command & Punctuation Formatter ---
 function formatTranscript(text) {
@@ -49,30 +52,32 @@ function formatTranscript(text) {
 
 if (SpeechRecognition) {
     recognition = new SpeechRecognition();
-    recognition.continuous = true;      // Keep listening across pauses
-    recognition.interimResults = true;  // Stream guesses while speaking
+    recognition.continuous = true;      
+    recognition.interimResults = true;  
     recognition.lang = 'en-US';
 
     recognition.onstart = () => {
         isRecording = true;
+        sessionFinalText = ''; // Reset the session text when you start speaking
         micBtn.textContent = "Stop Listening";
         micBtn.classList.add('recording');
     };
 
     recognition.onresult = (event) => {
+        sessionFinalText = ''; // Clear and rebuild to avoid duplicates
         let interimTranscript = '';
-        let finalTranscript = '';
 
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
+        // NEW: Loop through ALL results from 0 to catch the entire phrase at once
+        for (let i = 0; i < event.results.length; ++i) {
             if (event.results[i].isFinal) {
-                finalTranscript += event.results[i][0].transcript + ' ';
+                sessionFinalText += event.results[i][0].transcript;
             } else {
                 interimTranscript += event.results[i][0].transcript;
             }
         }
 
-        // Apply formatting rules and output text
-        finalTextSpan.innerHTML += formatTranscript(finalTranscript);
+        // Apply formatting to the combined history and display it
+        finalTextSpan.innerHTML = formatTranscript(globalFinalText + sessionFinalText);
         guessedTextSpan.innerHTML = formatTranscript(interimTranscript);
     };
 
@@ -82,12 +87,15 @@ if (SpeechRecognition) {
 
     recognition.onend = () => {
         isRecording = false;
+        // Save this session's finalized text to the global history
+        globalFinalText += sessionFinalText; 
+        sessionFinalText = '';
+        
         micBtn.textContent = "Start Listening";
         micBtn.classList.remove('recording');
         guessedTextSpan.innerHTML = '';
     };
 
-    // Toggle recording state on button click
     micBtn.addEventListener('click', () => {
         if (isRecording) {
             recognition.stop();
@@ -97,7 +105,6 @@ if (SpeechRecognition) {
     });
 
 } else {
-    // Unsupported Browser State
     micBtn.textContent = "Browser Not Supported";
     micBtn.disabled = true;
     finalTextSpan.innerHTML = "<span style='color: #ff4b4b; font-weight: 600;'>Your browser does not support the Web Speech API. Please use a Chromium-based browser like Google Chrome or Microsoft Edge.</span>";
@@ -117,6 +124,8 @@ copyBtn.addEventListener('click', () => {
 
 // Utility: Clear text
 clearBtn.addEventListener('click', () => {
+    globalFinalText = '';
+    sessionFinalText = '';
     finalTextSpan.innerHTML = '';
     guessedTextSpan.innerHTML = '';
 });
