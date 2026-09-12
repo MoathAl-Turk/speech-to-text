@@ -9,37 +9,48 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 let recognition;
 let isRecording = false;
 
-// --- NEW FEATURE: Voice Command Dictionary ---
-// This function checks the text for spoken commands and replaces them with symbols
+// --- Voice Command & Punctuation Formatter ---
 function formatTranscript(text) {
     let formatted = text;
-    
-    // Formatting and Spacing
-    formatted = formatted.replace(/\bnew paragraph\b/gi, '\n\n');
-    formatted = formatted.replace(/\bnew line\b/gi, '\n');
-    
-    // Punctuation Marks
+
+    // Structural Spacing
+    formatted = formatted.replace(/\b(new paragraph|paragraph)\b/gi, '\n\n');
+    formatted = formatted.replace(/\b(new line|next line)\b/gi, '\n');
+
+    // Standard Punctuation
     formatted = formatted.replace(/\bcomma\b/gi, ',');
-    formatted = formatted.replace(/\bperiod\b/gi, '.');
-    formatted = formatted.replace(/\bfull stop\b/gi, '.');
+    formatted = formatted.replace(/\b(period|full stop|dot)\b/gi, '.');
     formatted = formatted.replace(/\bquestion mark\b/gi, '?');
-    formatted = formatted.replace(/\bexclamation mark\b/gi, '!');
-    formatted = formatted.replace(/\bexclamation point\b/gi, '!');
+    formatted = formatted.replace(/\b(exclamation mark|exclamation point)\b/gi, '!');
     formatted = formatted.replace(/\bcolon\b/gi, ':');
     formatted = formatted.replace(/\bsemicolon\b/gi, ';');
-    formatted = formatted.replace(/\bhyphen\b/gi, '-');
-    formatted = formatted.replace(/\bdash\b/gi, '-');
-    
-    // Clean up accidental spaces before punctuation (e.g., "Hello ," becomes "Hello,")
+    formatted = formatted.replace(/\b(hyphen|dash)\b/gi, '-');
+
+    // Special Characters & Symbols
+    formatted = formatted.replace(/\b(open quote|start quote|open quotes)\b/gi, '"');
+    formatted = formatted.replace(/\b(close quote|end quote|close quotes)\b/gi, '"');
+    formatted = formatted.replace(/\b(open parenthesis|open bracket)\b/gi, '(');
+    formatted = formatted.replace(/\b(close parenthesis|close bracket)\b/gi, ')');
+    formatted = formatted.replace(/\b(at sign|at symbol)\b/gi, '@');
+    formatted = formatted.replace(/\b(hashtag|hash mark|number sign)\b/gi, '#');
+    formatted = formatted.replace(/\b(percent sign|percentage)\b/gi, '%');
+    formatted = formatted.replace(/\bampersand\b/gi, '&');
+    formatted = formatted.replace(/\basterisk\b/gi, '*');
+    formatted = formatted.replace(/\bslash\b/gi, '/');
+
+    // Remove unwanted spaces preceding punctuation marks
     formatted = formatted.replace(/\s+([,.?!:;])/g, '$1');
-    
+
+    // Clean whitespace right after paragraph and line breaks
+    formatted = formatted.replace(/\n\s+/g, '\n');
+
     return formatted;
 }
 
 if (SpeechRecognition) {
     recognition = new SpeechRecognition();
-    recognition.continuous = true;      
-    recognition.interimResults = true;  
+    recognition.continuous = true;      // Keep listening across pauses
+    recognition.interimResults = true;  // Stream guesses while speaking
     recognition.lang = 'en-US';
 
     recognition.onstart = () => {
@@ -60,7 +71,7 @@ if (SpeechRecognition) {
             }
         }
 
-        // Run both the final and live-guessing text through our formatting function
+        // Apply formatting rules and output text
         finalTextSpan.innerHTML += formatTranscript(finalTranscript);
         guessedTextSpan.innerHTML = formatTranscript(interimTranscript);
     };
@@ -73,10 +84,10 @@ if (SpeechRecognition) {
         isRecording = false;
         micBtn.textContent = "Start Listening";
         micBtn.classList.remove('recording');
-        guessedTextSpan.innerHTML = ''; 
+        guessedTextSpan.innerHTML = '';
     };
 
-    // Toggle recording on button click
+    // Toggle recording state on button click
     micBtn.addEventListener('click', () => {
         if (isRecording) {
             recognition.stop();
@@ -86,17 +97,17 @@ if (SpeechRecognition) {
     });
 
 } else {
-    // --- NEW FEATURE: Visible Error Message ---
+    // Unsupported Browser State
     micBtn.textContent = "Browser Not Supported";
     micBtn.disabled = true;
-    finalTextSpan.innerHTML = "<span style='color: #ff4b4b; font-weight: bold;'>❌ Your browser does not support the Web Speech API. Please try using Google Chrome or Microsoft Edge.</span>";
+    finalTextSpan.innerHTML = "<span style='color: #ff4b4b; font-weight: 600;'>Your browser does not support the Web Speech API. Please use a Chromium-based browser like Google Chrome or Microsoft Edge.</span>";
 }
 
 // Utility: Copy text to clipboard
 copyBtn.addEventListener('click', () => {
     const textToCopy = finalTextSpan.innerText;
     if (!textToCopy) return;
-    
+
     navigator.clipboard.writeText(textToCopy).then(() => {
         const originalText = copyBtn.textContent;
         copyBtn.textContent = "Copied!";
