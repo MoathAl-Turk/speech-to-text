@@ -1,24 +1,73 @@
+/* --- Base Styling & Animated Gradient Background --- */
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #131314;
+    /* A subtle, dark animated gradient background */
+    background: linear-gradient(-45deg, #0f1012, #1a1c23, #0f1012, #16181d);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
     color: #e3e3e3;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
+    overflow: hidden; /* Prevents scrollbars from the glowing effects */
 }
 
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* --- The Interactive Glassmorphism Container --- */
 .app-container {
     width: 100%;
     max-width: 700px;
-    background-color: #1e1f20;
+    background-color: rgba(30, 31, 32, 0.6); /* Semi-transparent base */
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
     padding: 30px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    
+    /* Frosted glass effect */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    
     display: flex;
     flex-direction: column;
     gap: 20px;
+    
+    /* Required for the spotlight pseudo-element to position correctly */
+    position: relative;
+    overflow: hidden; 
+}
+
+/* --- The Cursor Spotlight Effect --- */
+.app-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* The magic: A radial gradient that uses JS-provided X and Y coordinates */
+    background: radial-gradient(
+        800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+        rgba(75, 144, 255, 0.08),
+        transparent 40%
+    );
+    
+    z-index: 0; /* Keeps the glow behind the text and buttons */
+    pointer-events: none; /* Ensures the glow doesn't block mouse clicks */
+    transition: background 0.2s ease;
+}
+
+/* --- UI Elements (Elevated above the glow) --- */
+.header, .text-display, .controls {
+    position: relative;
+    z-index: 1;
 }
 
 .header { text-align: center; }
@@ -26,8 +75,8 @@ body {
 .header p { color: #aaa; font-size: 14px; margin-top: 5px; }
 
 .text-display {
-    background-color: #131314;
-    border: 1px solid #333;
+    background-color: rgba(19, 19, 20, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 12px;
     height: 300px;
     padding: 20px;
@@ -35,6 +84,7 @@ body {
     line-height: 1.6;
     overflow-y: auto;
     white-space: pre-wrap;
+    box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .controls {
@@ -45,20 +95,22 @@ body {
 
 .btn {
     padding: 12px 24px;
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 30px;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
 }
 
-.primary-btn { background-color: #0b57d0; color: white; }
-.primary-btn:hover { background-color: #4b90ff; }
-.primary-btn.recording { background-color: #ff4b4b; animation: pulse 1.5s infinite; }
+/* Button Hover States */
+.primary-btn { background-color: #0b57d0; color: white; border: none; }
+.primary-btn:hover { background-color: #4b90ff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(75, 144, 255, 0.4); }
+.primary-btn.recording { background-color: #ff4b4b; animation: pulse 1.5s infinite; box-shadow: 0 0 20px rgba(255, 75, 75, 0.5); }
 
-.secondary-btn { background-color: #282a2c; color: #e3e3e3; }
-.secondary-btn:hover { background-color: #444; }
+.secondary-btn { color: #e3e3e3; }
+.secondary-btn:hover { background-color: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
 
 @keyframes pulse {
     0% { transform: scale(1); }
