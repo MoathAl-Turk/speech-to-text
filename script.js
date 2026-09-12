@@ -2,9 +2,11 @@ const micBtn = document.getElementById('mic-btn');
 const copyBtn = document.getElementById('copy-btn');
 const clearBtn = document.getElementById('clear-btn');
 const finalTextSpan = document.getElementById('final-text');
-const interimTextSpan = document.getElementById('guessing-text');
+const guessedTextSpan = document.getElementById('guessed-text');
 
 // Initialize the Web Speech API
+// interimResults is a property of the Web Speech API 
+// .continuous is a boolean property that dictates whether the microphone keeps listening after taking a breath
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition;
 let isRecording = false;
@@ -35,7 +37,8 @@ if (SpeechRecognition) {
 
         // Append final words and show live guessing words
         finalTextSpan.innerHTML += finalTranscript;
-        interimTextSpan.innerHTML = interimTranscript;
+        // FIXED: Used the correct variable name defined at the top
+        guessedTextSpan.innerHTML = interimTranscript; 
     };
 
     recognition.onerror = (event) => {
@@ -46,7 +49,7 @@ if (SpeechRecognition) {
         isRecording = false;
         micBtn.textContent = "Start Listening";
         micBtn.classList.remove('recording');
-        interimTextSpan.innerHTML = ''; 
+        guessedTextSpan.innerHTML = ''; 
     };
 
     // Toggle recording on button click
@@ -79,5 +82,6 @@ copyBtn.addEventListener('click', () => {
 // Utility: Clear text
 clearBtn.addEventListener('click', () => {
     finalTextSpan.innerHTML = '';
-    interimTextSpan.innerHTML = '';
+    // FIXED: Used the correct variable name defined at the top
+    guessedTextSpan.innerHTML = '';
 });
