@@ -5,16 +5,41 @@ const finalTextSpan = document.getElementById('final-text');
 const guessedTextSpan = document.getElementById('guessed-text');
 
 // Initialize the Web Speech API
-// interimResults is a property of the Web Speech API 
-// .continuous is a boolean property that dictates whether the microphone keeps listening after taking a breath
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition;
 let isRecording = false;
 
+// --- NEW FEATURE: Voice Command Dictionary ---
+// This function checks the text for spoken commands and replaces them with symbols
+function formatTranscript(text) {
+    let formatted = text;
+    
+    // Formatting and Spacing
+    formatted = formatted.replace(/\bnew paragraph\b/gi, '\n\n');
+    formatted = formatted.replace(/\bnew line\b/gi, '\n');
+    
+    // Punctuation Marks
+    formatted = formatted.replace(/\bcomma\b/gi, ',');
+    formatted = formatted.replace(/\bperiod\b/gi, '.');
+    formatted = formatted.replace(/\bfull stop\b/gi, '.');
+    formatted = formatted.replace(/\bquestion mark\b/gi, '?');
+    formatted = formatted.replace(/\bexclamation mark\b/gi, '!');
+    formatted = formatted.replace(/\bexclamation point\b/gi, '!');
+    formatted = formatted.replace(/\bcolon\b/gi, ':');
+    formatted = formatted.replace(/\bsemicolon\b/gi, ';');
+    formatted = formatted.replace(/\bhyphen\b/gi, '-');
+    formatted = formatted.replace(/\bdash\b/gi, '-');
+    
+    // Clean up accidental spaces before punctuation (e.g., "Hello ," becomes "Hello,")
+    formatted = formatted.replace(/\s+([,.?!:;])/g, '$1');
+    
+    return formatted;
+}
+
 if (SpeechRecognition) {
     recognition = new SpeechRecognition();
-    recognition.continuous = true;      // Keep listening until stopped
-    recognition.interimResults = true;  // Show words as you speak
+    recognition.continuous = true;      
+    recognition.interimResults = true;  
     recognition.lang = 'en-US';
 
     recognition.onstart = () => {
@@ -35,10 +60,9 @@ if (SpeechRecognition) {
             }
         }
 
-        // Append final words and show live guessing words
-        finalTextSpan.innerHTML += finalTranscript;
-        // FIXED: Used the correct variable name defined at the top
-        guessedTextSpan.innerHTML = interimTranscript; 
+        // Run both the final and live-guessing text through our formatting function
+        finalTextSpan.innerHTML += formatTranscript(finalTranscript);
+        guessedTextSpan.innerHTML = formatTranscript(interimTranscript);
     };
 
     recognition.onerror = (event) => {
@@ -62,9 +86,10 @@ if (SpeechRecognition) {
     });
 
 } else {
+    // --- NEW FEATURE: Visible Error Message ---
     micBtn.textContent = "Browser Not Supported";
     micBtn.disabled = true;
-    alert("Sorry! Your browser does not support the Web Speech API. Try Chrome or Edge.");
+    finalTextSpan.innerHTML = "<span style='color: #ff4b4b; font-weight: bold;'>❌ Your browser does not support the Web Speech API. Please try using Google Chrome or Microsoft Edge.</span>";
 }
 
 // Utility: Copy text to clipboard
@@ -82,6 +107,5 @@ copyBtn.addEventListener('click', () => {
 // Utility: Clear text
 clearBtn.addEventListener('click', () => {
     finalTextSpan.innerHTML = '';
-    // FIXED: Used the correct variable name defined at the top
     guessedTextSpan.innerHTML = '';
 });
